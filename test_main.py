@@ -26,15 +26,14 @@ bt = Button(win, text="зарегистрироваться", command=lambda:reg
 bt.pack()
 
 def register_user(user_name, user_password):
-    mycursor.execute("SELECT * FROM user WHERE username=%s", (user_name,))
+    mycursor.execute("SELECT * FROM test WHERE username=%s", (user_name,))
     if mycursor.fetchone():
-        Label(win, text="Такой пользователь существует").pack()
+        Label("Пользователь существует").pack
     else:
         user_password = hashlib.sha256(user_password.encode()).hexdigest()
-        mycursor.execute("INSERT INTO user (username, password) VALUES (%s, %s)", (user_name, user_password))
-        Label(win, text="Вы зарегистрированы !").pack()
+        mycursor.execute("INSERT INTO test (username, password) VALUES (%s, %s)", (user_name, user_password))
+        Label("вы зарегистрированы")
         mydb.commit()
-
 
 
 
