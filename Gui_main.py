@@ -1,12 +1,8 @@
 import mysql.connector
 import hashlib
-from tkinter import *
+from tkinter import Toplevel, Entry, Button, Label, Tk
 
-win = Tk()
-win.geometry("410x200")
-
-def create_database():
-    mycursor = mydb.cursor()
+def create_database(mycursor, mydb, database):
     mycursor.execute(f"CREATE DATABASE IF NOT EXISTS {database}")
     mycursor.execute("CREATE TABLE IF NOT EXISTS test(id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(255), password VARCHAR(255))")
 
@@ -33,18 +29,17 @@ def settings():
         host_val = host_entry.get()
         user = user_host_entry.get()
         password = password_host_entry.get()
-        global database
-        database = database_host_entry.get()
+        database_name = database_host_entry.get()
 
         try:
-            global mydb
             mydb = mysql.connector.connect(
                 host=host_val,
                 user=user,
                 password=password,
-                database=database
+                database=database_name
             )
-            create_database()
+            mycursor = mydb.cursor()
+            create_database(mycursor, mydb, database_name)
             print("Connected to the database successfully")
         except mysql.connector.Error as err:
             if err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
@@ -58,25 +53,8 @@ def settings():
     close = Button(setting, text="Закрыть", command=lambda: close_window())
     close.grid(row=4, column=3, padx=5, pady=5)
 
-mydb = mysql.connector.connect(
-  host="127.0.0.1",
-  user="root",
-  password="",
-  database='Magnat'
-)
-
-
-def hide_label(user_name_label):
-    user_name_label.config(text="")
-
-def hide_label1(user_password_label):
-    user_password_label.config(text="")
-
-def hide_label2(user_name_label_login):
-    user_name_label_login.config(text="")
-
-def hide_label3(user_password_label_login):
-    user_password_label_login.config(text="")
+win = Tk()
+win.geometry("410x200")
 
 user_name_entry = Entry(win, width=25)
 user_name_entry.grid(column=1, row=1, pady=5, padx=10)
@@ -100,7 +78,7 @@ def register_user(user_name, user_password):
         
         user_name_label = Label(win, text="Пользователь существует", font=('fixed', 10))
         user_name_label.grid(column=1, row=5)
-        win.after(2000, lambda: hide_label(user_name_label))
+        win.after(2000, lambda: user_name_label.config(text=""))
 
     else:
         user_password = hashlib.sha256(user_password.encode()).hexdigest()
@@ -108,7 +86,7 @@ def register_user(user_name, user_password):
 
         user_password_label = Label(win, text="вы зарегистрированы", font=('fixed', 10))
         user_password_label.grid(column=1, row=5)
-        win.after(2000, lambda: hide_label1(user_password_label))
+        win.after(2000, lambda: user_password_label.config(text=""))
         mydb.commit()
 
 
@@ -120,12 +98,12 @@ def login_user(user_name, user_password):
     if user:
         user_name_label_login = Label(win, text=f"Добро пожаловать, {user_name}!", font=('fixed', 10))
         user_name_label_login.grid(column=1, row=5)
-        win.after(2000, lambda: hide_label2(user_name_label_login))
+        win.after(2000, lambda: user_name_label_login.config(text=""))
+
     else:
         user_password_label_login = Label(win, text="Неправильный логин или пароль", font=('fixed', 10))
         user_password_label_login.grid(column=1, row=5)
-        win.after(2000, lambda: hide_label3(user_password_label_login))
-
+        win.after(2000, lambda: user_password_label_login.config(text=""))
 
 win.grid_columnconfigure(0, minsize=60)
 win.grid_columnconfigure(1, minsize=60)
@@ -138,4 +116,11 @@ win.grid_rowconfigure(3, minsize=30)
 win.grid_rowconfigure(4, minsize=30)
 win.grid_rowconfigure(5, minsize=30)
 
-win.mainloop()
+if __name__ == "__main__":
+    mydb = mysql.connector.connect(
+        host="127.0.0.1",
+        user="root",
+        password="",
+        database="Magnat"
+    )
+    win.mainloop()
