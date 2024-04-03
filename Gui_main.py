@@ -2,10 +2,9 @@ import mysql.connector
 import hashlib
 from tkinter import Toplevel, Entry, Button, Label, Tk
 
-def create_database(mycursor, mydb, database):
-    mycursor.execute(f"CREATE DATABASE IF NOT EXISTS {database}")
+def create_database(mycursor, database_name):
+    mycursor.execute(f"CREATE DATABASE IF NOT EXISTS {database_name}")
     mycursor.execute("CREATE TABLE IF NOT EXISTS test(id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(255), password VARCHAR(255))")
-
 
 def settings():
     setting = Toplevel(win)
@@ -39,7 +38,7 @@ def settings():
                 database=database_name
             )
             mycursor = mydb.cursor()
-            create_database(mycursor, mydb, database_name)
+            create_database(mycursor, database_name)
             print("Connected to the database successfully")
         except mysql.connector.Error as err:
             if err.errno == mysql.connector.errorcode.ER_BAD_DB_ERROR:
@@ -75,7 +74,6 @@ def register_user(user_name, user_password):
     mycursor = mydb.cursor()
     mycursor.execute("SELECT * FROM test WHERE username=%s", (user_name,))
     if mycursor.fetchone():
-        
         user_name_label = Label(win, text="Пользователь существует", font=('fixed', 10))
         user_name_label.grid(column=1, row=5)
         win.after(2000, lambda: user_name_label.config(text=""))
@@ -89,7 +87,6 @@ def register_user(user_name, user_password):
         win.after(2000, lambda: user_password_label.config(text=""))
         mydb.commit()
 
-
 def login_user(user_name, user_password):
     mycursor = mydb.cursor()
     user_password = hashlib.sha256(user_password.encode()).hexdigest()
@@ -99,7 +96,6 @@ def login_user(user_name, user_password):
         user_name_label_login = Label(win, text=f"Добро пожаловать, {user_name}!", font=('fixed', 10))
         user_name_label_login.grid(column=1, row=5)
         win.after(2000, lambda: user_name_label_login.config(text=""))
-
     else:
         user_password_label_login = Label(win, text="Неправильный логин или пароль", font=('fixed', 10))
         user_password_label_login.grid(column=1, row=5)
@@ -109,7 +105,6 @@ win.grid_columnconfigure(0, minsize=60)
 win.grid_columnconfigure(1, minsize=60)
 win.grid_columnconfigure(2, minsize=60)
 win.grid_columnconfigure(3, minsize=60)
-
 win.grid_rowconfigure(1, minsize=30)
 win.grid_rowconfigure(2, minsize=30)
 win.grid_rowconfigure(3, minsize=30)
